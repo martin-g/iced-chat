@@ -1,22 +1,17 @@
-use iced::widget::{
-    Button, Column, Container,
-    Row, Scrollable, Text, TextInput,
-};
+mod models;
+
+use iced::widget::{button, text_input, Column, Container, Row, Scrollable, Text};
 use iced::{application, Element, Length, Settings, Theme};
 use iced::alignment::{Horizontal, Vertical};
+use crate::models::ChatApp;
 
-pub fn main() -> iced::Result {
+#[tokio::main]
+pub async fn main() -> iced::Result {
     application("Chat Application", update, view)
         .settings(Settings::default())
         .theme(|_| Theme::Dark)
         .centered()
         .run()
-}
-
-#[derive(Default, Debug)]
-struct ChatApp {
-    messages: Vec<String>,
-    input_value: String,
 }
 
 #[derive(Debug, Clone)]
@@ -40,18 +35,16 @@ fn update(chat: &mut ChatApp, message: Message) {
 }
 
 fn view(chat: &ChatApp) -> Element<Message> {
-    let input = TextInput::new(
-        "Type a message...",
-        &chat.input_value,
-    )
-        .on_input(Message::InputChanged)
-        .padding(10)
-        .size(16);
+    
+    Container::new(messages_container(chat))
+        .width(Length::Fill)
+        .height(Length::Fill)
+        .align_x(Horizontal::Center)
+        .align_y(Vertical::Bottom)
+        .into()
+}
 
-    let send_button = Button::new(Text::new("Send"))
-        .padding(10)
-        .on_press(Message::SendPressed);
-
+fn messages_container(chat: &ChatApp) -> Element<'_, Message> {
     let messages: Element<_> = chat
         .messages
         .iter()
@@ -63,15 +56,29 @@ fn view(chat: &ChatApp) -> Element<Message> {
     let scrollable = Scrollable::new(messages)
         .spacing(10);
 
-    let content = Column::new()
+    Column::new()
         .spacing(20)
         .push(scrollable)
-        .push(Row::new().spacing(10).push(input).push(send_button).align_y(Vertical::Bottom));
-
-    Container::new(content)
-        .width(Length::Fill)
-        .height(Length::Fill)
-        .align_x(Horizontal::Center)
-        .align_y(Vertical::Center)
+        .push(Row::new().spacing(10).push(msg_input(chat)).push(send_button(chat)))
         .into()
+
+}
+
+fn msg_input(chat: &ChatApp) -> Element<'_, Message> {
+    text_input(
+        "Type a message...",
+        &chat.input_value,
+    )
+        .on_input(Message::InputChanged)
+        .padding(10)
+        .size(16)
+        .into()
+}
+
+fn send_button(_chat: &ChatApp) -> Element<'_, Message> {
+    button("Send")
+        .padding(10)
+        .on_press(Message::SendPressed)
+        .into()
+
 }
