@@ -1,6 +1,6 @@
 mod models;
 
-use iced::widget::{button, text_input, Column, Container, Row, Scrollable, Text};
+use iced::widget::{button, container, row, scrollable, text, text_input, Column};
 use iced::{application, Element, Length, Settings, Theme};
 use iced::alignment::{Horizontal, Vertical};
 use crate::models::ChatApp;
@@ -35,8 +35,7 @@ fn update(chat: &mut ChatApp, message: Message) {
 }
 
 fn view(chat: &ChatApp) -> Element<Message> {
-    
-    Container::new(messages_container(chat))
+    container(messages_container(chat))
         .width(Length::Fill)
         .height(Length::Fill)
         .align_x(Horizontal::Center)
@@ -49,17 +48,17 @@ fn messages_container(chat: &ChatApp) -> Element<'_, Message> {
         .messages
         .iter()
         .fold(Column::new().spacing(10), |column, message| {
-            column.push(Text::new(message)).width(Length::Fill)
+            column.push(text(message)).width(Length::Fill)
         })
         .into();
 
-    let scrollable = Scrollable::new(messages)
+    let scrollable = scrollable(messages)
         .spacing(10);
 
     Column::new()
         .spacing(20)
         .push(scrollable)
-        .push(Row::new().spacing(10).push(msg_input(chat)).push(send_button(chat)))
+        .push(row([msg_input(chat), send_button(chat)]).spacing(10))
         .into()
 
 }
